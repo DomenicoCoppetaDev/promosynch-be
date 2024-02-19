@@ -289,5 +289,32 @@ happeningsRouter.get('/test', (req, res) => {
   }
 })
 
+// client check in
+.put('/:id/checkin', async (req, res, next) => {
+  const { id } = req.params;
+  const { clientId, checkedIn } = req.body
+
+  try {
+
+      if (!req.body.title && !req.body.start && !req.body.end && !req.body.ticketPrice && !req.body.location && !req.body.description) {
+          return res.status(400).json({ error: 'Nessun dato valido fornito per l\'aggiornamento.' });
+      }
+
+      const updatedHappening = await Happening.findOneAndUpdate(
+        id,
+          { 'clients._id': clientId },
+          { $set: { 'clients.$.checkedIn': checkedIn } },
+          { new: true }
+      );
+
+      if (!updatedHappening) {
+          return res.status(404).send();
+      }
+      res.json(updatedHappening);
+  } catch (error) {
+      next(error);
+  }
+  })
+
 
 export default happeningsRouter;
